@@ -5,7 +5,7 @@ const PORT = 8080;
 const generateRandomString = () => {
   const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   return Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
-}
+};
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -46,6 +46,12 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const shortID = generateRandomString();
+  urlDatabase[shortID] = req.body.longURL;
+  res.redirect(`/urls/${shortID}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id];
+  res.redirect(longURL);
 });
