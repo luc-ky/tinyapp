@@ -100,16 +100,26 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
+// email lookup helper function
+const getUserByEmail = (email, users) => Object.values(users).some(user => user.email === email);
+
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const newUserID = generateRandomString();
-  users[newUserID] = {
-    id: newUserID,
-    email: email,
-    password: password,
-  };
-  console.log(users[newUserID]);
-  res.cookie('user_id', newUserID);
+
+  if (!email || !password) {
+    res.status(400).send("Invalid email or password");
+  } else if (getUserByEmail(email, users)) {
+    res.status(400).send("Email address already exists");
+  } else {
+    const newUserID = generateRandomString();
+    users[newUserID] = {
+      id: newUserID,
+      email: email,
+      password: password,
+    };
+    res.cookie('user_id', newUserID);
+  }
+  console.log(users);
   res.redirect('/urls');
 });
