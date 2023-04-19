@@ -120,6 +120,12 @@ app.post("/register", (req, res) => {
     };
     res.cookie('user_id', newUserID);
   }
-  console.log(users);
   res.redirect('/urls');
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    user: users[req.cookies["user_id"]]
+  };
+  res.render("login", templateVars);
 });
