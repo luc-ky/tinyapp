@@ -41,10 +41,16 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+// return urls that belong to user
+const urlsForUser = (id, urlDatabase) => Object.fromEntries(
+  Object.entries(urlDatabase).filter(([_, data]) => data.userID === id)
+);
+
 app.get("/urls", (req, res) => {
+  const userID = req.cookies["user_id"];
   const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]]
+    urls: urlsForUser(userID, urlDatabase),
+    user: users[userID]
   };
   res.render("urls_index", templateVars);
 });
@@ -63,10 +69,19 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
+  const userID = req.cookies["user_id"];
+  if (!userID) {
+    res.status(403).send("Please log in to edit or view your URL");
+    return;
+  }
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.id)) {
+    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+    return;
+  }
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
-    user: users[req.cookies["user_id"]]
+    user: users[userID]
   };
   res.render("urls_show", templateVars);
 });

@@ -20,6 +20,13 @@
     <%- include('partials/_header') %>
     <main style="margin: 1em;">
       <h3>My URLs</h3>
+      <% if(!user) { %>
+        <div>
+          <p>
+            Sorry, please login or register to view your URLs
+          </p>
+        </div>
+      <% } else { %>
       <table class="table">
         <thead>
           <tr>
@@ -48,6 +55,7 @@
           <% } %>
         </tbody>
       </table>
+      <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script
