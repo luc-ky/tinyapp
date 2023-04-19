@@ -36,7 +36,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
@@ -44,7 +44,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]]
   };
@@ -84,17 +84,30 @@ app.post("/urls/:id", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+
+  if (!getUserByEmail(email, users)) {
+    res.status(403).send("Email cannot be found");
+  } else {
+    for (let userID in users) {
+      if (email === users[`${userID}`]["email"] && password === users[`${userID}`]["password"]) {
+        res.cookie('user_id', userID);
+        res.redirect('/urls');
+      } else {
+        res.status(403).send("Incorrect password");
+      }
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_register", templateVars);
@@ -124,7 +137,7 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = { 
+  const templateVars = {
     user: users[req.cookies["user_id"]]
   };
   res.render("login", templateVars);
