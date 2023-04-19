@@ -13,8 +13,14 @@ const generateRandomString = () => {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {};
@@ -59,7 +65,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
@@ -72,7 +78,10 @@ app.post("/urls", (req, res) => {
     return;
   }
   const shortID = generateRandomString();
-  urlDatabase[shortID] = req.body.longURL;
+  urlDatabase[shortID] = {
+    longURL: req.body.longURL,
+    userID: userID
+  }
   res.redirect(`/urls/${shortID}`);
 });
 
@@ -81,7 +90,7 @@ app.get("/u/:id", (req, res) => {
     res.status(404).send("Sorry, the requested URL does not exist");
     return;
   }
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   res.redirect(longURL);
 });
 
@@ -93,7 +102,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.newURL;
+  urlDatabase[shortURL].longURL = req.body.newURL;
   res.redirect('/urls');
 });
 
