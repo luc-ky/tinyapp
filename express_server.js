@@ -110,13 +110,23 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  const userID = req.cookies["user_id"];
   const shortURL = req.params.id;
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
+    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+    return;
+  }
   delete urlDatabase[shortURL];
   res.redirect('/urls');
 });
 
 app.post("/urls/:id", (req, res) => {
+  const userID = req.cookies["user_id"];
   const shortURL = req.params.id;
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
+    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+    return;
+  }
   urlDatabase[shortURL].longURL = req.body.newURL;
   res.redirect('/urls');
 });
