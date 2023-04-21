@@ -8,9 +8,8 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-    <title>URL - TinyApp Example</title>
+    <title>TinyApp - URL</title>
   </head>
-
   <body>
     <%- include('partials/_header') %>
     <div class="card text-center">
@@ -25,7 +24,7 @@
         <h5>Edit</h5>
         <form action="/urls/<%= id %>" method="POST">
         <label for="newURL">New URL:</label>
-        <input type="text" name="newURL" placeholder="http://" style="width: 300px; margin: 1em">
+        <input type="text" name="newURL" value="<%= longURL %>" style="width: 300px; margin: 1em">
         <button type="submit" class="btn btn-primary">Update</button>
         </form>
       </div>

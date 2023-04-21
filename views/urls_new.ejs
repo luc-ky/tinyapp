@@ -6,7 +6,6 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -14,13 +13,10 @@
       integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
       crossorigin="anonymous"
     />
-
-    <title>New URL - TinyApp Example</title>
+    <title>TinyApp - Create New URL</title>
   </head>
-
   <body>
     <%- include('partials/_header') %>
-
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
       <form class="form-inline" action="/urls" method="POST">
@@ -30,7 +26,7 @@
             class="form-control"
             type="text"
             name="longURL"
-            placeholder="http://"
+            placeholder="https://"
             style="width: 300px; margin: 1em"
           />
           <button type="submit" class="btn btn-primary">Submit</button>

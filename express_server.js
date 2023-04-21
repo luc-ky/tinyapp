@@ -1,4 +1,4 @@
-const getUserByEmail = require('./helpers.js');
+const { generateRandomString, getUserByEmail, urlsForUser  } = require('./helpers.js');
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -15,43 +15,24 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }));
 
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-};
-
+const urlDatabase = {};
 const users = {};
 
-const generateRandomString = () => {
-  const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  return Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
-};
-
-// return urls that belong to user
-const urlsForUser = (id, urlDatabase) => Object.fromEntries(
-  Object.entries(urlDatabase).filter((entry) => entry[1].userID === id)
-);
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+app.get("/", (req, res) => {
+  const user = users[req.session.user_id];
+  if (user) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 app.get("/urls", (req, res) => {
@@ -171,7 +152,7 @@ app.get("/register", (req, res) => {
     res.redirect('/urls');
     return;
   }
-  res.render("urls_register", templateVars);
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -180,8 +161,10 @@ app.post("/register", (req, res) => {
   const bcrypt = require("bcryptjs");
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (!email || !hashedPassword) {
-    res.status(400).send("Invalid email or password");
+  if (!email) {
+    res.status(400).send("Invalid email");
+  } else if (!password) {
+    res.status(400).send("Invalid password");
   } else if (getUserByEmail(email, users)) {
     res.status(400).send("Email address already exists");
   } else {
