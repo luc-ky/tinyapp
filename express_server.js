@@ -1,4 +1,4 @@
-const { generateRandomString, getUserByEmail, urlsForUser  } = require('./helpers.js');
+const { generateRandomString, getUserByEmail, urlsForUser } = require('./helpers.js');
 
 const express = require("express");
 const cookieSession = require('cookie-session');
@@ -77,6 +77,41 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.get("/u/:id", (req, res) => {
+  const url = urlDatabase[request.params.id];
+  if (url) {
+    const longURL = url.longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Sorry, the requested URL does not exist");
+    return;
+  }
+});
+
+app.get("/login", (req, res) => {
+  const userID = req.session.user_id;
+  const templateVars = {
+    user: users[userID]
+  };
+  if (userID) {
+    res.redirect('/urls');
+    return;
+  }
+  res.render("login", templateVars);
+});
+
+app.get("/register", (req, res) => {
+  const userID = req.session.user_id;
+  const templateVars = {
+    user: users[userID]
+  };
+  if (userID) {
+    res.redirect('/urls');
+    return;
+  }
+  res.render("register", templateVars);
+});
+
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
@@ -89,37 +124,6 @@ app.post("/urls", (req, res) => {
     userID: userID
   };
   res.redirect(`/urls/${shortID}`);
-});
-
-app.get("/u/:id", (req, res) => {
-  if (!urlDatabase[req.params.id]) {
-    res.status(404).send("Sorry, the requested URL does not exist");
-    return;
-  }
-  const longURL = urlDatabase[req.params.id].longURL;
-  res.redirect(longURL);
-});
-
-app.delete("/urls/:id/delete", (req, res) => {
-  const userID = req.session.user_id;
-  const shortURL = req.params.id;
-  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
-    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
-    return;
-  }
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
-});
-
-app.put("/urls/:id", (req, res) => {
-  const userID = req.session.user_id;
-  const shortURL = req.params.id;
-  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
-    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
-    return;
-  }
-  urlDatabase[shortURL].longURL = req.body.newURL;
-  res.redirect('/urls');
 });
 
 app.post("/login", (req, res) => {
@@ -143,18 +147,6 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect('/login');
-});
-
-app.get("/register", (req, res) => {
-  const userID = req.session.user_id;
-  const templateVars = {
-    user: users[userID]
-  };
-  if (userID) {
-    res.redirect('/urls');
-    return;
-  }
-  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -181,14 +173,24 @@ app.post("/register", (req, res) => {
   res.redirect('/urls');
 });
 
-app.get("/login", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
-  const templateVars = {
-    user: users[userID]
-  };
-  if (userID) {
-    res.redirect('/urls');
+  const shortURL = req.params.id;
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
+    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
     return;
   }
-  res.render("login", templateVars);
+  urlDatabase[shortURL].longURL = req.body.newURL;
+  res.redirect('/urls');
+});
+
+app.delete("/urls/:id/delete", (req, res) => {
+  const userID = req.session.user_id;
+  const shortURL = req.params.id;
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
+    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+    return;
+  }
+  delete urlDatabase[shortURL];
+  res.redirect('/urls');
 });
