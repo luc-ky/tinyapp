@@ -1,3 +1,5 @@
+const getUserByEmail = require('./helpers.js');
+
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
@@ -172,9 +174,6 @@ app.get("/register", (req, res) => {
   res.render("urls_register", templateVars);
 });
 
-// email lookup helper function
-const getUserByEmail = (email, users) => Object.values(users).some(user => user.email === email);
-
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -192,7 +191,6 @@ app.post("/register", (req, res) => {
       email: email,
       password: hashedPassword,
     };
-    console.log(users);
     req.session.user_id = newUserID;
   }
   res.redirect('/urls');
