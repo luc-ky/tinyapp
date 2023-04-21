@@ -3,6 +3,7 @@ const { generateRandomString, getUserByEmail, urlsForUser  } = require('./helper
 const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const methodOverride = require('method-override');
 
 const app = express();
 const PORT = 8080;
@@ -14,6 +15,7 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }));
+app.use(methodOverride('_method'));
 
 const urlDatabase = {};
 const users = {};
@@ -98,7 +100,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 });
 
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.id;
   if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
@@ -109,7 +111,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.id;
   if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
