@@ -96,7 +96,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortID] = {
     longURL: req.body.longURL,
     userID: userID
-  }
+  };
   res.redirect(`/urls/${shortID}`);
 });
 
@@ -134,12 +134,13 @@ app.post("/urls/:id", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const bcrypt = require("bcryptjs");
 
   if (!getUserByEmail(email, users)) {
     res.status(403).send("Email cannot be found");
   } else {
     for (let userID in users) {
-      if (email === users[`${userID}`]["email"] && password === users[`${userID}`]["password"]) {
+      if (email === users[`${userID}`]["email"] && bcrypt.compareSync(password, users[`${userID}`]["password"])) {
         res.cookie('user_id', userID);
         res.redirect('/urls');
       } else {
@@ -172,8 +173,10 @@ const getUserByEmail = (email, users) => Object.values(users).some(user => user.
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const bcrypt = require("bcryptjs");
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (!email || !password) {
+  if (!email || !hashedPassword) {
     res.status(400).send("Invalid email or password");
   } else if (getUserByEmail(email, users)) {
     res.status(400).send("Email address already exists");
@@ -182,8 +185,9 @@ app.post("/register", (req, res) => {
     users[newUserID] = {
       id: newUserID,
       email: email,
-      password: password,
+      password: hashedPassword,
     };
+    console.log(users);
     res.cookie('user_id', newUserID);
   }
   res.redirect('/urls');
