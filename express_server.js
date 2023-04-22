@@ -19,7 +19,7 @@ app.use(cookieSession({
 app.use(methodOverride('_method'));
 
 app.listen(PORT, () => {
-  console.log(`TinyApp is listening on port ${PORT}!`);
+  console.log(`tinyAPP is listening on port ${PORT}!`);
 });
 
 app.get('/', (req, res) => { // homepage
@@ -182,7 +182,6 @@ app.post('/logout', (req, res) => { // POST logout -- used in partials/_header.e
 app.post('/register', (req, res) => { // POST register new user -- used in register.ejs
   const email = req.body.email;
   const password = req.body.password;
-  const bcrypt = require('bcryptjs');
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (!email || !password) { // if email or password are empty
