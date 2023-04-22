@@ -4,8 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Screenshot of URLs"](https://raw.githubusercontent.com/luc-ky/tinyapp/master/docs/urls.png)
+!["Screenshot of Details"](https://raw.githubusercontent.com/luc-ky/tinyapp/master/docs/details.png)
+!["Screenshot of Error"](https://raw.githubusercontent.com/luc-ky/tinyapp/master/docs/error.png)
 
 ## Dependencies
 
@@ -14,6 +15,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - EJS
 - bcryptjs
 - cookie-session
+- method-override
 
 ## Getting Started
 
