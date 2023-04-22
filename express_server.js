@@ -22,16 +22,16 @@ app.listen(PORT, () => {
   console.log(`TinyApp is listening on port ${PORT}!`);
 });
 
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { // homepage
   const user = users[req.session.user_id];
   if (user) { // if user is logged in
-    res.redirect('/urls');
+    res.redirect('/urls'); // redirect to URLs page
   } else {
-    res.redirect('/login');
+    res.redirect('/login'); // otherwise redirect to login page
   }
 });
 
-app.get('/urls', (req, res) => {
+app.get('/urls', (req, res) => { // list of URLs page
   const userID = req.session.user_id;
   if (userID) { 
     let templateVars = {
@@ -44,12 +44,12 @@ app.get('/urls', (req, res) => {
       user: users[userID],
       error: 'Sorry, please login or register to access this website',
     };
-    res.render('error', templateVars); // pass error message to template
+    res.render('error', templateVars); // pass error message to error page
     return;
   }
 });
 
-app.get('/urls/new', (req, res) => {
+app.get('/urls/new', (req, res) => { // new URL page
   const userID = req.session.user_id;
   let templateVars = {
     urls: urlDatabase,
@@ -62,13 +62,13 @@ app.get('/urls/new', (req, res) => {
   res.render('urls_new', templateVars);
 });
 
-app.get('/urls/:id', (req, res) => {
+app.get('/urls/:id', (req, res) => { // edit URL page
   const userID = req.session.user_id;
   const shortURL = req.params.id;
   if (!userID) {
     let templateVars = {
       user: users[req.session.user_id],
-      error: 'Please log in to edit or view your URL',
+      error: 'Sorry, please log in to edit or view your URL',
     };
     res.render('error', templateVars);
     return;
@@ -89,7 +89,7 @@ app.get('/urls/:id', (req, res) => {
   }
 });
 
-app.get('/u/:id', (req, res) => {
+app.get('/u/:id', (req, res) => { // the short link -- redirects to the long URL
   const url = urlDatabase[req.params.id];
   if (url) {
     const longURL = url.longURL;
@@ -104,19 +104,19 @@ app.get('/u/:id', (req, res) => {
   }
 });
 
-app.get('/login', (req, res) => {
+app.get('/login', (req, res) => { // login page
   const userID = req.session.user_id;
   let templateVars = {
     user: users[userID]
   };
   if (userID) {
-    res.redirect('/urls');
+    res.redirect('/urls'); // redirect to URLs page if already logged in
     return;
   }
   res.render('login', templateVars);
 });
 
-app.get('/register', (req, res) => {
+app.get('/register', (req, res) => { // registration page
   const userID = req.session.user_id;
   let templateVars = {
     user: users[userID]
@@ -128,7 +128,7 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
-app.post('/urls', (req, res) => {
+app.post('/urls', (req, res) => { // POST new URL to database -- used in urls_new.ejs
   const userID = req.session.user_id;
   if (!userID) {
     let templateVars = {
@@ -139,14 +139,14 @@ app.post('/urls', (req, res) => {
     return;
   }
   const shortID = generateRandomString();
-  urlDatabase[shortID] = {
+  urlDatabase[shortID] = { 
     longURL: req.body.longURL,
     userID: userID
   };
   res.redirect(`/urls/${shortID}`);
 });
 
-app.post('/login', (req, res) => {
+app.post('/login', (req, res) => { // POST login -- used in login.ejs
   const email = req.body.email;
   const password = req.body.password;
 
@@ -174,12 +174,12 @@ app.post('/login', (req, res) => {
   }
 });
 
-app.post('/logout', (req, res) => {
-  req.session = null;
+app.post('/logout', (req, res) => { // POST logout -- used in partials/_header.ejs
+  req.session = null; // clear cookies
   res.redirect('/login');
 });
 
-app.post('/register', (req, res) => {
+app.post('/register', (req, res) => { // POST register new user -- used in register.ejs
   const email = req.body.email;
   const password = req.body.password;
   const bcrypt = require('bcryptjs');
@@ -211,7 +211,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-app.put('/urls/:id', (req, res) => {
+app.put('/urls/:id', (req, res) => { // PUT URLs -- used in urls_show.ejs
   const userID = req.session.user_id;
   const shortURL = req.params.id;
   if (userID === urlDatabase[shortURL].userID) { // if URL belongs to user
@@ -227,7 +227,7 @@ app.put('/urls/:id', (req, res) => {
   }
 });
 
-app.delete('/urls/:id/delete', (req, res) => {
+app.delete('/urls/:id/delete', (req, res) => { // DELETE URLs -- used in urls_index.ejs
   const userID = req.session.user_id;
   const shortURL = req.params.id;
   if (userID === urlDatabase[shortURL].userID) { 

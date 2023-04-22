@@ -1,7 +1,8 @@
-// generate random 6 length string from all possible alphanumberic characters
+// generate random string to be used as unique identifiers
 const generateRandomString = () => {
+  // all possible alphanumberic characters
   const characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  // generate an array of length 6 and fill it with possible characters, then concatenate into a string and return value
+  // generate an array of length 6 and fill it with random characters, then concatenate into a string and return value
   return Array.from({ length: 6 }, () => characters[Math.floor(Math.random() * characters.length)]).join('');
 };
 
@@ -12,7 +13,7 @@ const getUserByEmail = (email, users) => {
       return user;
     }
   }
-  return undefined;
+  return undefined; // if email not found
 };
 
 // return urls that belong to user
