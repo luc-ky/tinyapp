@@ -24,12 +24,12 @@
               <td><%= urls[id].longURL %></td>
               <td>
                 <a href="/urls/<%= id %>">
-                <button type="submit" class="btn btn-outline-primary">Edit</button>
+                <button type="submit" class="btn btn-primary">Edit</button>
                 </a>
               </td>          
               <td>
                 <form method="POST" action="/urls/<%= id %>/delete?_method=DELETE">
-                <button type="submit" class="btn btn-outline-danger">Delete</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
               </td>
             </tr>
