@@ -24,10 +24,6 @@ app.listen(PORT, () => {
   console.log(`TinyApp listening on port ${PORT}!`);
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
 app.get("/", (req, res) => {
   const user = users[req.session.user_id];
   if (user) {
@@ -39,11 +35,20 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  const templateVars = {
-    urls: urlsForUser(userID, urlDatabase),
-    user: users[userID]
-  };
-  res.render("urls_index", templateVars);
+  if (userID) {
+    const templateVars = {
+      urls: urlsForUser(userID, urlDatabase),
+      user: users[userID]
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, please login or register to access this website',
+    };
+    res.render('error', templateVars);
+    return;
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -62,11 +67,19 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    res.status(403).send("Please log in to edit or view your URL");
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Please log in to edit or view your URL',
+    };
+    res.render('error', templateVars);
     return;
   }
   if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(req.params.id)) {
-    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, you do not have permission to view or edit this URL',
+    };
+    res.render('error', templateVars);
     return;
   }
   const templateVars = {
@@ -78,12 +91,16 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req, res) => {
-  const url = urlDatabase[request.params.id];
+  const url = urlDatabase[req.params.id];
   if (url) {
     const longURL = url.longURL;
     res.redirect(longURL);
   } else {
-    res.status(404).send("Sorry, the requested URL does not exist");
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, the requested URL does not exist',
+    };
+    res.render('error', templateVars);
     return;
   }
 });
@@ -115,7 +132,11 @@ app.get("/register", (req, res) => {
 app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   if (!userID) {
-    res.status(401).send("Sorry, you must be logged in to shorten URLs.");
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, you must be logged in to shorten URLs',
+    };
+    res.render('error', templateVars);
     return;
   }
   const shortID = generateRandomString();
@@ -131,14 +152,24 @@ app.post("/login", (req, res) => {
   const password = req.body.password;
 
   if (!getUserByEmail(email, users)) {
-    res.status(403).send("Email cannot be found");
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, the email address you entered can not be found',
+    };
+    res.render('error', templateVars);
+    return;
   } else {
     for (let userID in users) {
       if (email === users[`${userID}`]["email"] && bcrypt.compareSync(password, users[`${userID}`]["password"])) {
         req.session.user_id = userID;
         res.redirect('/urls');
       } else {
-        res.status(403).send("Incorrect password");
+        let templateVars = {
+          user: users[req.session.user_id],
+          error: 'Sorry, the password you have entered is incorrect',
+        };
+        res.render('error', templateVars);
+        return;
       }
     }
   }
@@ -155,12 +186,20 @@ app.post("/register", (req, res) => {
   const bcrypt = require("bcryptjs");
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  if (!email) {
-    res.status(400).send("Invalid email");
-  } else if (!password) {
-    res.status(400).send("Invalid password");
-  } else if (getUserByEmail(email, users)) {
-    res.status(400).send("Email address already exists");
+  if (!email || !password) { // if email or password are empty
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, the email address or password can not be blank',
+    };
+    res.render('error', templateVars);
+    return;
+  } else if (getUserByEmail(email, users)) { // if email already exists
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, the email address you have entered already exists',
+    };
+    res.render('error', templateVars);
+    return;
   } else {
     const newUserID = generateRandomString();
     users[newUserID] = {
@@ -168,7 +207,7 @@ app.post("/register", (req, res) => {
       email: email,
       password: hashedPassword,
     };
-    req.session.user_id = newUserID;
+    req.session.user_id = newUserID; // set cookie
   }
   res.redirect('/urls');
 });
@@ -176,8 +215,12 @@ app.post("/register", (req, res) => {
 app.put("/urls/:id", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.id;
-  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
-    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) { // if URL doesn't belong to user
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, you do not have permission to edit this URL',
+    };
+    res.render('error', templateVars);
     return;
   }
   urlDatabase[shortURL].longURL = req.body.newURL;
@@ -187,8 +230,12 @@ app.put("/urls/:id", (req, res) => {
 app.delete("/urls/:id/delete", (req, res) => {
   const userID = req.session.user_id;
   const shortURL = req.params.id;
-  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) {
-    res.status(401).send("Sorry, you do not have permission to view or edit this URL");
+  if (!Object.keys(urlsForUser(userID, urlDatabase)).includes(shortURL)) { // if URL doesn't belong to user
+    let templateVars = {
+      user: users[req.session.user_id],
+      error: 'Sorry, you do not have permission to delete this URL',
+    };
+    res.render('error', templateVars);
     return;
   }
   delete urlDatabase[shortURL];
